@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title id="title">Bean</title>
+		<link rel="shortcut icon" href="bean.png">
+		<script>
+			var beans = 1;
+			var money = 0;
+			var bps = 0;
+			var mps = 0;
+			var bpc = 1;
+			var mpc = 1;
+			var bpsStarted = False;
+			var mpsStarted = False;
+			update();
+			function removeDollar(cost) {
+				cost = cost.split("");
+				if (cost[0] == "$") {
+					cost.shift();
+				}
+				cost = cost.join("");
+				return parseInt(cost);
+			}
+			function update() {
+				document.getElementById("beans").innerHTML = parseInt(beans) + " beans";
+				document.getElementById("money").innerHTML = "$" + parseInt(money);
+				document.getElementById("bps").innerHTML = bps;
+				document.getElementById("mps").innerHTML = mps;
+				document.title = "Bean: $" + parseInt(money) + " " + parseInt(beans) + " beans";
+			}
+			function makeBean(num) {
+				beans+= num;
+				update();
+			}
+			function makeMoney(num) {
+				if (beans >= num) {
+					money+= num;
+					beans-= num;
+					update();
+				}
+			}
+			function save() {
+				localStorage.setItem("beans", beans);
+				localStorage.setItem("money", money);
+				localStorage.setItem("bps", bps);
+				localStorage.setItem("mps", mps);
+				localStorage.setItem("scissors", document.getElementById("scissors").innerHTML);
+				localStorage.setItem("can", document.getElementById("can").innerHTML);
+				localStorage.setItem("scythe", document.getElementById("scythe").innerHTML);
+				localStorage.setItem("crate", document.getElementById("crate").innerHTML);
+				localStorage.setItem("farmer", document.getElementById("farmer").innerHTML);
+				localStorage.setItem("banker", document.getElementById("banker").innerHTML);
+				localStorage.setItem("scissorsCost", document.getElementById("scissorsCost").innerHTML);
+				localStorage.setItem("canCost", document.getElementById("canCost").innerHTML);
+				localStorage.setItem("scytheCost", document.getElementById("scytheCost").innerHTML);
+				localStorage.setItem("crateCost", document.getElementById("crateCost").innerHTML);
+				localStorage.setItem("farmerCost", document.getElementById("farmerCost").innerHTML);
+				localStorage.setItem("bankerCost", document.getElementById("bankerCost").innerHTML);
+			}
+			function reset() {
+				localStorage.setItem("beans", 0);
+				localStorage.setItem("money", 0);
+				localStorage.setItem("bps", 0);
+				localStorage.setItem("mps", 0);
+				localStorage.setItem("scissors", 0);
+				localStorage.setItem("can", 0);
+				localStorage.setItem("scythe", 0);
+				localStorage.setItem("crate", 0);
+				localStorage.setItem("farmer", 0);
+				localStorage.setItem("banker", 0);
+				localStorage.setItem("scissorsCost", 10);
+				localStorage.setItem("canCost", 10);
+				localStorage.setItem("scytheCost", 100);
+				localStorage.setItem("crateCost", 100);
+				localStorage.setItem("farmerCost", 200);
+				localStorage.setItem("bankerCost", 200);
+				update();
+				location.reload();
+			}
+			function upgrade(product, change, item) {
+				var cost = removeDollar(document.getElementById(item.toLowerCase() + "Cost").innerHTML);
+				if (money >= cost) {
+					money-= cost;
+					if (product == "bps") {
+						bps = Math.round((bps + change) * 10) / 10;
+						document.getElementById("bps").innerHTML = bps;
+						if (!bpsStarted) {
+							bpsStarted = !bpsStarted;
+							bpsAuto();
+						}
+					} else if (product == "mps") {
+						mps = Math.round((mps + change) * 10) / 10;
+						document.getElementById("mps").innerHTML = mps;
+						if (!mpsStarted) {
+							mpsStarted = !mpsStarted;
+							mpsAuto();
+						}
+					} else if (product == "money") {
+						mpc = Math.round(mpc + change);
+					} else if (product == "beans") {
+						bpc = Math.round(bpc + change);
+					}
+					document.getElementById(item.toLowerCase() + "Cost").innerHTML = "$" + Math.round(cost * 1.1);
+					document.getElementById(item.toLowerCase()).innerHTML = parseInt(document.getElementById(item.toLowerCase()).innerHTML) + 1;
+					update();
+				}
+			}
+			function bpsAuto() {
+				setInterval(function() {makeBean(bps/100); }, 10);
+			}
+			function mpsAuto() {
+				setInterval(function() {makeMoney(mps/100); }, 10);
+			}
+			function loadStorage(name, money) {
+				if (money) {
+					document.getElementById(name).innerHTML = "$" + removeDollar(localStorage.getItem(name).toString());
+				} else {
+					document.getElementById(name).innerHTML = parseInt(localStorage.getItem(name));
+				}
+			}
+			function cookieTimer() {
+				beans = parseFloat(localStorage.getItem("beans"));
+				money = parseFloat(localStorage.getItem("money"));
+				bps = parseFloat(localStorage.getItem("bps"));
+				mps = parseFloat(localStorage.getItem("mps"));
+				loadStorage("scissors", false);
+				loadStorage("can", false);
+				loadStorage("scythe", false);
+				loadStorage("crate", false);
+				loadStorage("farmer", false);
+				loadStorage("banker", false);
+				loadStorage("scissorsCost", true);
+				loadStorage("canCost", true);
+				loadStorage("scytheCost", true);
+				loadStorage("crateCost", true);
+				loadStorage("farmerCost", true);
+				loadStorage("bankerCost", true);
+				update();
+				if (bps > 0) {
+					bpsStarted = true;
+					bpsAuto();
+				}
+				if (mps > 0) {
+					mpsStarted = true;
+					mpsAuto();
+				}
+				setInterval(function() {save();}, 60000);
+			}
+		</script>
+		<style>
+			.counter {
+				padding-top: 100px;
+				font-size: 30px;
+				padding-left: 10px;
+			}
+			.ps {
+				font-size: 18px;
+			}
+			.clicker {
+				padding-left: 0px;
+				height: 300px;
+			}
+			.clicker:active{
+				transform: translateY(5px);
+			}
+			.upgrade {
+				padding-top: 10px;
+				padding-bottom: 15px;
+				padding-left: 30px;
+				padding-right: 250px;
+				width: 100px;
+				font-size: 20px;
+				box-shadow: 5px 10px #888;
+			}
+			.upgrade:hover{
+				transition: 0.5s ease;
+				opacity: 0.5;
+				box-shadow: 5px 10px #444;
+			}
+			.upgrade:active{
+				transform: translateY(5px);
+				box-shadow: 5px 5px #000;
+			}
+			.split {
+				position: sticky;
+			}
+			.cost {
+				font-size: 10px;
+				color: #444;
+				padding: 0px;
+				padding-left: 30px;
+			}
+			.topButtons {
+				background: #aaa;
+				box-shadow: none;
+				height: 20px;
+				width: auto;
+			}
+			.headers {
+				font-size: 35px;
+			}
+			.left {
+				float: left;
+			}
+			.right {
+				float: right;
+			}
+		</style>
+	</head>
+	<body onLoad="cookieTimer();">
+		<div>
+			<button onClick="save();" style="margin-left: 1250px" class="topButtons">Save</button>
+			<button onClick="reset();" class="topButtons">Reset</button>
+		</div>
+		<center style="position: sticky; top: 0; width: 700px; margin-left: auto; margin-right: auto;">
+			<a class="counter" id="beans">0 beans</a>
+			<a class="counter" id="money">$3</a><br>
+			<a class="ps">beans/second: </a><a id="bps" class="ps">0</a><br>
+			<a class="ps">money/second: </a><a id="mps" class="ps">0</a><br>
+			<img id="getBeans" alt="bean" class="clicker" src="Bean.png" onClick="makeBean(bpc)"> 
+			<img id="getMoney" alt="money" class="clicker" src="dollarSign.png" onClick="makeMoney(mpc)">
+		</center>
+		<button class="upgrade left" onClick="upgrade('bps', 0.1, 'Scissors')">
+			<a id="scissors">0</a>
+			Scissors
+			<img src="scissors.png" height="50" alt="Scissors">
+			<a id="scissorsCost" class="cost">$10</a>
+		</button>
+		<button class="upgrade right" onClick="upgrade('mps', 0.1, 'Can')">
+			<a id="can">0</a>
+			Can
+			<img src="can.png" height="50" alt="Can">
+			<a id="canCost" class="cost">$10</a>
+		</button>
+		<br><br><br><br><br><br><br><br><br>
+		<button class="upgrade left" onClick="upgrade('bps', 1, 'Scythe')">
+			<a id="scythe">0</a>
+			Scythe
+			<img src="scythe.png" height="50" alt="Scythe">
+			<a id="scytheCost" class="cost">$100</a>
+		</button>
+		<button class="upgrade right" onClick="upgrade('mps', 1, 'Crate')">
+			<a id="crate">0</a>
+			Crate
+			<img src="crate.png" height="50" alt="Crate">
+			<a id="crateCost" class="cost">$100</a>
+		</button>
+		<br><br><br><br><br><br><br><br><br>
+		<button class="upgrade left" onClick="upgrade('bps', 2, 'Farmer')">
+			<a id="farmer">0</a>
+			Farmer
+			<img src="farmer.png" height="50" alt="Farmer">
+			<a id="farmerCost" class="cost">$200</a>
+		</button>
+		<button class="upgrade right" onClick="upgrade('mps', 2, 'Banker')">
+			<a id="banker">0</a>
+			Banker
+			<img src="banker.png" height="50" alt="Banker">
+			<a id="bankerCost" class="cost">$200</a>
+		</button>
+		<br><br><br><br><br><br><br><br><br>
+	<p style="font-size: 11px; color: #777; bottom: 0; right: 0; float: right;">Made by: Ryan Su   2019</p>
+	</body>
+</html>
